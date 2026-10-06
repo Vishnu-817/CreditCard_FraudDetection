@@ -1,4 +1,26 @@
+# Large dataset files (prevents pushing >100MB files to GitHub)
 PS_20174392719_1491204439457_log.csv
+*.csv
+
+# Python environments and bytecode
 __pycache__/
+*.py[cod]
+*$py.class
 .venv/
 venv/
+env/
+ENV/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Model and data artifacts
+*.pkl
+*.joblib
+*.h5
+
+# OS & IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

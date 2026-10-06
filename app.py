@@ -102,13 +102,21 @@ st.write(
 uploaded_file = st.sidebar.file_uploader("Upload the transaction CSV", type=["csv"])
 if uploaded_file is not None:
     data_source: object = uploaded_file
+    source_id = uploaded_file.name
     st.sidebar.success(f"Using uploaded file: {uploaded_file.name}")
 elif DATA_PATH.is_file():
     data_source = DATA_PATH
+    source_id = DATA_PATH.name
     st.sidebar.info(f"Using local file: {DATA_PATH.name}")
 else:
     data_source = None
+    source_id = None
     st.info("Upload the CSV to begin. On Streamlit Cloud, the local dataset is not included.")
+
+# Reset dashboard if data source changes
+if "current_source" in st.session_state and st.session_state["current_source"] != source_id:
+    st.session_state.pop("fraud_dashboard", None)
+st.session_state["current_source"] = source_id
 
 if data_source is not None and st.button("Analyze transactions", type="primary"):
     with st.spinner("Reading and summarizing the CSV in chunks..."):
@@ -127,17 +135,32 @@ if result is not None:
     metric_columns[0].metric("Transactions", f"{summary['transactions']:,}")
     metric_columns[1].metric("Fraud transactions", f"{summary['fraud_transactions']:,}")
     metric_columns[2].metric("Fraud rate", f"{summary['fraud_rate_percent']:.3f}%")
-    metric_columns[3].metric("Average amount", f"{summary['average_amount']:,.2f}")
+    metric_columns[3].metric("Average amount", f"${summary['average_amount']:,.2f}")
     st.caption(
-        f"Transaction amount range: {summary['minimum_amount']:,.2f} "
-        f"to {summary['maximum_amount']:,.2f}"
+        f"Transaction amount range: ${summary['minimum_amount']:,.2f} "
+        f"to ${summary['maximum_amount']:,.2f}"
     )
 
-    st.subheader("Transactions by type")
-    st.bar_chart(by_type[["transactions"]])
+    st.subheader("Transaction breakdown by type")
+    st.dataframe(
+        by_type.rename(
+            columns={
+                "transactions": "Total Transactions",
+                "fraud_transactions": "Fraud Count",
+                "total_amount": "Total Volume",
+                "fraud_rate_percent": "Fraud Rate (%)",
+            }
+        ),
+        use_container_width=True,
+    )
 
-    st.subheader("Fraud rate by transaction type")
-    st.bar_chart(by_type[["fraud_rate_percent"]])
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Transactions by type")
+        st.bar_chart(by_type[["transactions"]])
+    with col2:
+        st.subheader("Fraud rate (%) by type")
+        st.bar_chart(by_type[["fraud_rate_percent"]])
 
     st.subheader("Transaction sample")
     transaction_types = sorted(sample["type"].astype(str).unique())
@@ -147,7 +170,10 @@ if result is not None:
         default=transaction_types,
     )
     filtered_sample = sample[sample["type"].astype(str).isin(selected_types)]
-    st.dataframe(filtered_sample, use_container_width=True, hide_index=True)
+    if filtered_sample.empty:
+        st.info("No transactions match the selected filter.")
+    else:
+        st.dataframe(filtered_sample, use_container_width=True, hide_index=True)
     st.caption(
         f"Showing up to {len(sample):,} sampled rows, not the entire dataset."
     )
