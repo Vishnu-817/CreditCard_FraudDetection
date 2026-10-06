@@ -1,7 +1,14 @@
 from pathlib import Path
 
 import pandas as pd
-import streamlit as st
+
+try:
+    import streamlit as st  # type: ignore[import-not-found]
+except ModuleNotFoundError as exc:
+    raise SystemExit(
+        "The 'streamlit' dependency is required to run this app. "
+        "Install it with: pip install streamlit"
+    ) from exc
 
 
 DATA_PATH = Path(__file__).parent / "PS_20174392719_1491204439457_log.csv"
