@@ -1,14 +1,24 @@
+import sys
 from pathlib import Path
 
 import pandas as pd
 
 try:
     import streamlit as st  # type: ignore[import-not-found]
+    from streamlit.runtime import exists
 except ModuleNotFoundError as exc:
     raise SystemExit(
         "The 'streamlit' dependency is required to run this app. "
         "Install it with: pip install streamlit"
     ) from exc
+
+# Automatically launch Streamlit web server if executed directly via `python app.py`
+if __name__ == "__main__" and not exists():
+    from streamlit.web import cli as stcli
+
+    sys.argv = ["streamlit", "run", __file__] + sys.argv[1:]
+    sys.exit(stcli.main())
+
 
 
 DATA_PATH = Path(__file__).parent / "PS_20174392719_1491204439457_log.csv"
