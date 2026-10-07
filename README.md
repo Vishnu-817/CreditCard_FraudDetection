@@ -7,7 +7,7 @@ An end-to-end Machine Learning and Streamlit web application for exploring finan
 ## 📌 Project Overview
 
 This repository features:
-- **Interactive Streamlit Web Dashboard (`app.py`)**: Efficiently analyzes multi-gigabyte transaction datasets in streaming chunks (100,000 rows/chunk), displaying key metrics, fraud rates by transaction type, breakdown charts, and filterable samples.
+- **Interactive Streamlit Web Dashboard (`app.py`)**: Efficiently analyzes large transaction datasets in streaming chunks (100,000 rows/chunk), displaying key metrics, fraud rates by transaction type, breakdown charts, and filterable samples.
 - **Machine Learning & EDA Pipeline (`main.ipynb`)**: Performs exploratory data analysis, outlier handling (Winsorization and IQR clipping), data preprocessing, and trains a supervised classification model (`DecisionTreeClassifier`) yielding **99.95% accuracy** and an **ROC-AUC of 0.9820**.
 
 ---
@@ -63,6 +63,11 @@ streamlit run app.py
 The dashboard automatically loads `PS_20174392719_1491204439457_log.csv` if it exists in the root directory. If the dataset is not present, you can upload any compliant CSV (with `type`, `amount`, and `isFraud` columns) through the sidebar.
 
 ### 4. Run the Jupyter Notebook
+Install Jupyter if it is not already available in your environment:
+```bash
+pip install jupyter
+```
+
 ```bash
 jupyter notebook main.ipynb
 ```
